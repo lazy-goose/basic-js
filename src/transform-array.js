@@ -1,5 +1,3 @@
-const { NotImplementedError } = require('../extensions/index.js');
-
 /**
  * Create transformed array based on the control sequences that original
  * array contains
@@ -13,11 +11,37 @@ const { NotImplementedError } = require('../extensions/index.js');
  * transform([1, 2, 3, '--discard-prev', 4, 5]) => [1, 2, 4, 5]
  * 
  */
-function transform(/* arr */) {
-  throw new NotImplementedError('Not implemented');
-  // remove line with error and write your code here
+function transform(toCopy) {
+  if (!Array.isArray(toCopy)) {
+    throw new Error("'arr' parameter must be an instance of the Array!")
+  }
+
+  const arr = [...toCopy]
+  const isCommand = (el) => [
+    '--discard-next',
+    '--discard-prev',
+    '--double-next',
+    '--double-prev',
+    '--discard'
+  ].includes(el)
+
+  return arr.reduce((arr, _, i) => {
+    if (isCommand(arr[i])) return arr
+
+    if (arr[i - 1] === '--discard-next')
+      arr.splice(i - 1, 2, '--discard')
+    if (arr[i - 1] === '--double-next')
+      arr.splice(i - 1, 2, arr[i], arr[i])
+
+    if (arr[i + 1] === '--discard-prev')
+      arr.splice(i, 2, '--discard')
+    if (arr[i + 1] === '--double-prev')
+      arr.splice(i, 2, arr[i], arr[i])
+
+    return arr
+  }, arr).filter(el => !isCommand(el))
 }
 
 module.exports = {
   transform
-};
+}
